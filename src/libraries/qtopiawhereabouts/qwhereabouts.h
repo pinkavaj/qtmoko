@@ -54,7 +54,7 @@ public:
     State state() const;
     int numSatellites() const;
 
-    void setUpdateInterval(int interval);
+    void setUpdateInterval(int msec);
     int updateInterval() const;
 
     QWhereaboutsUpdate lastUpdate() const;

@@ -200,9 +200,9 @@ int QWhereabouts::numSatellites() const
     The default update interval is 0. An update interval of 0 means that
     updated() is emitted as soon as a valid update becomes available.
 */
-void QWhereabouts::setUpdateInterval(int interval)
+void QWhereabouts::setUpdateInterval(int msec)
 {
-    d->interval = interval;
+    d->interval = msec;
 }
 
 int QWhereabouts::updateInterval() const
