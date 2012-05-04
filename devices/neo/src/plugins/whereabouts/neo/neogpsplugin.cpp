@@ -29,27 +29,19 @@
 #include <QMessageBox>
 #include <qtopialog.h>
 
-#include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
 
 #define NMEA_GPS_DEVICE "/dev/ttySAC1"
 
 namespace {
-    void stty_noecho(const char *dev)
+    void stty_raw(int fd)
     {
-        int fd;
-
-        fd = open(dev, O_NOCTTY, O_RDWR);
-        if (fd == -1)
-            return;
-
         struct termios ttystate;
 
         tcgetattr(fd, &ttystate);
         cfmakeraw(&ttystate);
         tcsetattr(fd, TCSANOW, &ttystate);
-        close(fd);
     }
 }
 
@@ -61,7 +53,6 @@ NeoGpsPlugin::NeoGpsPlugin(QObject *parent)
 {
     qLog(Hardware) << __PRETTY_FUNCTION__;
     system("/opt/qtmoko/bin/gps-poweron.sh");
-    stty_noecho(NMEA_GPS_DEVICE);
 }
 
 NeoGpsPlugin::~NeoGpsPlugin()
@@ -91,6 +82,7 @@ QWhereabouts *NeoGpsPlugin::create(const QString &source)
         return 0;
     }
 
+    stty_raw(sourceFile->handle());
     QNmeaWhereabouts *whereabouts = new QNmeaWhereabouts(QNmeaWhereabouts::RealTimeMode, this);
     whereabouts->setSourceDevice(sourceFile);
 
