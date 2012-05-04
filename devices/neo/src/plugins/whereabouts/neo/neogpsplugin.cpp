@@ -29,7 +29,30 @@
 #include <QMessageBox>
 #include <qtopialog.h>
 
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+
 #define NMEA_GPS_DEVICE "/dev/ttySAC1"
+
+namespace {
+    void stty_noecho(const char *dev)
+    {
+        int fd;
+
+        fd = open(dev, O_NOCTTY, O_RDWR);
+        if (fd == -1)
+            return;
+
+        struct termios ttystate;
+
+        tcgetattr(fd, &ttystate);
+        cfmakeraw(&ttystate);
+        tcsetattr(fd, TCSANOW, &ttystate);
+        close(fd);
+    }
+}
+
 /*
  This plugin only works for Neo neo Freerunner
 */
@@ -38,7 +61,7 @@ NeoGpsPlugin::NeoGpsPlugin(QObject *parent)
 {
     qLog(Hardware) << __PRETTY_FUNCTION__;
     system("/opt/qtmoko/bin/gps-poweron.sh");
-    system("stty -F /dev/ttySAC1 -echo");
+    stty_noecho(NMEA_GPS_DEVICE);
 }
 
 NeoGpsPlugin::~NeoGpsPlugin()
